@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+// import { StrictMode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
 import { createRoot } from 'react-dom/client'
 import Login from "./components/pages/Login";
@@ -8,7 +8,6 @@ import App from './App.jsx'
 import Navbar from './components/Navbar.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
     <BrowserRouter>
     <Navbar />
       <Routes>
@@ -17,5 +16,4 @@ createRoot(document.getElementById('root')).render(
         <Route path="/signup" element={<SignUp />} />
       </Routes>
     </BrowserRouter>
-  </StrictMode>,
 )

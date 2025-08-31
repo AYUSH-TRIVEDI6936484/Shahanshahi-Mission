@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function SignUp() {
   const [form, setForm] = useState({
@@ -13,15 +13,19 @@ export default function SignUp() {
   const [showPwd, setShowPwd] = useState(false);
   const [showCPwd, setShowCPwd] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const navigate = useNavigate();
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     if (!form.fullName || !form.email || !form.password || !form.confirmPassword) {
       setError("Please fill all required fields.");
@@ -36,16 +40,31 @@ export default function SignUp() {
       return;
     }
 
-    // TODO: Replace with your real signup API
-    const payload = {
-      name: form.fullName.trim(),
-      email: form.email.trim(),
-      password: form.password,
-      role: form.role,
-    };
-    console.log("SIGNUP ->", payload);
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: form.fullName.trim(),
+          email: form.email.trim(),
+          password: form.password,
+          role: form.role,
+        }),
+      });
 
-    alert(`Account created as ${form.role.toUpperCase()}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Signup failed");
+        return;
+      }
+
+      setSuccess("Account created successfully!");
+      setTimeout(() => navigate("/login"), 1500); // ✅ redirect after success
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      console.error(err);
+    }
   };
 
   return (
@@ -59,6 +78,11 @@ export default function SignUp() {
         {error && (
           <div className="mb-4 rounded-lg bg-red-100 text-red-700 px-3 py-2 text-sm">
             {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-4 rounded-lg bg-green-100 text-green-700 px-3 py-2 text-sm">
+            {success}
           </div>
         )}
 
@@ -159,7 +183,14 @@ export default function SignUp() {
               checked={form.agree}
               onChange={onChange}
             />
-            I agree to the <a href="#" className="text-amber-700 hover:underline">Terms</a> & <a href="#" className="text-amber-700 hover:underline">Privacy Policy</a>.
+            I agree to the{" "}
+            <a href="#" className="text-amber-700 hover:underline">
+              Terms
+            </a>{" "}
+            &{" "}
+            <a href="#" className="text-amber-700 hover:underline">
+              Privacy Policy
+            </a>.
           </label>
 
           {/* Submit */}
@@ -173,7 +204,10 @@ export default function SignUp() {
 
         <p className="text-sm text-gray-600 mt-6 text-center">
           Already have an account?{" "}
-          <Link to="/login" className="text-amber-700 font-semibold hover:underline">
+          <Link
+            to="/login"
+            className="text-amber-700 font-semibold hover:underline"
+          >
             Login
           </Link>
         </p>

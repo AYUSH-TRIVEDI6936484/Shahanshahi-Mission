@@ -1,22 +1,24 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [form, setForm] = useState({
     email: "",
     password: "",
-    role: "user", // "user" | "admin"
+    role: "user",
     remember: false,
   });
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState("");
+
+  const navigate = useNavigate();
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -25,18 +27,38 @@ export default function Login() {
       return;
     }
 
-    // TODO: Replace with your real auth call
-    // Example payload
-    const payload = {
-      email: form.email.trim(),
-      password: form.password,
-      role: form.role, // backend can enforce admin privileges based on role/claims
-      remember: form.remember,
-    };
-    console.log("LOGIN ->", payload);
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: form.email.trim(),
+          password: form.password,
+          role: form.role,
+        }),
+      });
 
-    // Simulate success
-    alert(`Logged in as ${form.role.toUpperCase()}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Login failed");
+        return;
+      }
+
+      // ✅ Save JWT token in localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // ✅ Navigate user depending on role
+      if (data.user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/user/dashboard");
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      console.error(err);
+    }
   };
 
   return (
@@ -58,7 +80,13 @@ export default function Login() {
           <div>
             <label className="block text-sm font-medium mb-2">Login as</label>
             <div className="flex gap-3">
-              <label className={`px-3 py-2 rounded-lg border cursor-pointer ${form.role === "user" ? "bg-amber-100 border-amber-400" : "border-gray-300"}`}>
+              <label
+                className={`px-3 py-2 rounded-lg border cursor-pointer ${
+                  form.role === "user"
+                    ? "bg-amber-100 border-amber-400"
+                    : "border-gray-300"
+                }`}
+              >
                 <input
                   type="radio"
                   name="role"
@@ -69,7 +97,13 @@ export default function Login() {
                 />
                 User
               </label>
-              <label className={`px-3 py-2 rounded-lg border cursor-pointer ${form.role === "admin" ? "bg-amber-100 border-amber-400" : "border-gray-300"}`}>
+              <label
+                className={`px-3 py-2 rounded-lg border cursor-pointer ${
+                  form.role === "admin"
+                    ? "bg-amber-100 border-amber-400"
+                    : "border-gray-300"
+                }`}
+              >
                 <input
                   type="radio"
                   name="role"
@@ -131,7 +165,10 @@ export default function Login() {
               />
               Remember me
             </label>
-            <button type="button" className="text-sm text-amber-700 hover:underline">
+            <button
+              type="button"
+              className="text-sm text-amber-700 hover:underline"
+            >
               Forgot password?
             </button>
           </div>
@@ -147,7 +184,10 @@ export default function Login() {
 
         <p className="text-sm text-gray-600 mt-6 text-center">
           Don’t have an account?{" "}
-          <Link to="/signup" className="text-amber-700 font-semibold hover:underline">
+          <Link
+            to="/signup"
+            className="text-amber-700 font-semibold hover:underline"
+          >
             Sign Up
           </Link>
         </p>

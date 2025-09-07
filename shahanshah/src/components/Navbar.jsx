@@ -21,6 +21,9 @@ function Navbar() {
           <a href="#books" className="hover:text-amber-600 font-medium">
             Books
           </a>
+           <a href="#contact" className="hover:text-amber-600 font-medium">
+            Followers
+          </a>
           <a href="#contact" className="hover:text-amber-600 font-medium">
             Contact Us
           </a>

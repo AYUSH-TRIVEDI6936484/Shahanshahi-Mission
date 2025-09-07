@@ -45,7 +45,6 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials (user not found)" });
     }
 
-    // 🔑 Compare plain password with hashed password in DB
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -55,7 +54,6 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials (password mismatch)" });
     }
 
-    // ✅ Generate JWT
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -77,5 +75,30 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Change password (works for both user & admin)
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email, newPassword, role } = req.body;
+
+    // Pick which collection to query
+    const Model = role === "admin" ? Admin : User;
+
+    const user = await Model.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: `${role} not found` });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: `${role} password updated successfully` });
+  } catch (err) {
+    console.error("Password reset error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 export default router;

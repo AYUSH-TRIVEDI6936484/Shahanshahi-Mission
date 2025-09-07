@@ -44,12 +44,9 @@ export default function Login() {
         setError(data.message || "Login failed");
         return;
       }
-
-      // ✅ Save JWT token in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // ✅ Navigate user depending on role
       if (data.user.role === "admin") {
         navigate("/admin/dashboard");
       } else {
@@ -81,11 +78,10 @@ export default function Login() {
             <label className="block text-sm font-medium mb-2">Login as</label>
             <div className="flex gap-3">
               <label
-                className={`px-3 py-2 rounded-lg border cursor-pointer ${
-                  form.role === "user"
+                className={`px-3 py-2 rounded-lg border cursor-pointer ${form.role === "user"
                     ? "bg-amber-100 border-amber-400"
                     : "border-gray-300"
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
@@ -98,11 +94,10 @@ export default function Login() {
                 User
               </label>
               <label
-                className={`px-3 py-2 rounded-lg border cursor-pointer ${
-                  form.role === "admin"
+                className={`px-3 py-2 rounded-lg border cursor-pointer ${form.role === "admin"
                     ? "bg-amber-100 border-amber-400"
                     : "border-gray-300"
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
@@ -165,12 +160,12 @@ export default function Login() {
               />
               Remember me
             </label>
-            <button
-              type="button"
+            <Link
+              to="/forgot-password"
               className="text-sm text-amber-700 hover:underline"
             >
               Forgot password?
-            </button>
+            </Link>
           </div>
 
           {/* Submit */}

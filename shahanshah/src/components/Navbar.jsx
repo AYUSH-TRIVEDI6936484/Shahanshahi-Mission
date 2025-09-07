@@ -24,9 +24,9 @@ function Navbar() {
            <a href="#contact" className="hover:text-amber-600 font-medium">
             Followers
           </a>
-          <a href="#contact" className="hover:text-amber-600 font-medium">
-            Contact Us
-          </a>
+         <Link to="/contact" className="hover:text-amber-600 font-medium">
+          Contact Us
+          </Link>
           <button
             className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-lg font-semibold hover:cursor-pointer"
             onClick={() => navigate("/login")}
